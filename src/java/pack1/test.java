@@ -43,10 +43,11 @@ public class test {
     int choice=1;
     private int id;
     double Leaf_Area=0;
-
+ 
     
      @WebMethod(operationName = "convertStringtoImage")
-    public String convertStringtoImage(@WebParam(name = "encodedImageStr") String encodedImageStr, @WebParam(name = "fileName") String fileName,@WebParam(name = "AOR") String AOR,@WebParam(name = "val") int value) throws SQLException, ClassNotFoundException{
+    public String convertStringtoImage(@WebParam(name = "encodedImageStr") String encodedImageStr, @WebParam(name = "fileName") String fileName,@WebParam(name = "AOR") String AOR,@WebParam(name = "val") int value) {
+        System.out.println("VAlue"+value);
         FileOutputStream imageOutFile = null; 
          try {
              Connection con,con1;
@@ -59,8 +60,6 @@ public class test {
              con = DriverManager.getConnection("jdbc:odbc:test");
              System.out.println(" driver loaded in connection.jsp");
              stmtnew   = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
-             
-             
              // Decode String using Base64 Class
              byte[] imageByteArray = Base64.decodeBase64(encodedImageStr);
              // Write Image into File system - Make sure you update the path
@@ -144,16 +143,16 @@ public class test {
                  
                 int count=countblackpixel(binPicPath);
                 calculatepixA(count, area);
-                returnVal=value+"/"+count+"/"+OnepixArea;
-
+                //returnVal=value+"/"+count+"/"+OnepixArea;
+                        
              }
              else if(value==2){
                  
                 int flag=countblackpixel(binPicPath);
                // calculatepixA(flag, area);
                  leafarea0(flag,area);
-                 returnVal=value+"/"+flag+"/"+OnepixArea+"/"+leafArea0;
-                 System.out.println(returnVal);
+                 //returnVal=value+"/"+flag+"/"+OnepixArea+"/"+leafArea0;
+                 //System.out.println(returnVal);
              }
              else if(value==3){
                  String Inserted3 = "update test set fileName180=? where id=?";
@@ -164,24 +163,30 @@ public class test {
                  int black=countblackpixel(binPicPath);
                  leafarea180(area, black);
                  finalarea();
-                 returnVal=value+"/"+black+"/"+OnepixArea+"/"+leafArea180+"/"+Leaf_Area;
+                 Statement stmt = con.createStatement();
+                ResultSet rs = null;
+                 String finalans = "select PhyAOR,onePixA,leafarea0,leafarea180,finalleafarea from test where id=" + id + "";
+                rs = stmt.executeQuery(finalans);
+                while (rs.next()) {
+                    returnVal=rs.getString("PhyAOR")+"/"+rs.getString("onePixA")+"/"+rs.getString("leafarea0")+"/"+rs.getString("leafarea180")+"/"+rs.getString("finalleafarea");
+                }
+                 //returnVal=value+"/"+black+"/"+OnepixArea+"/"+leafArea180+"/"+Leaf_Area;
              }
              else if(value==4){
-                 finalarea();
-                 System.out.println("hello");
-                 returnVal=value+"/"+Leaf_Area;
-                 System.out.println(returnVal);
-
-             }
-         } catch (FileNotFoundException ex) {
+                finalarea();
+                
+                }
+            
+         } catch (Exception ex) {
              Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
-         } catch (IOException ex) {
-             Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
-         } finally {
+             System.out.println(ex);
+         
+        } finally {
              try {
                  imageOutFile.close();
-             } catch (IOException ex) {
+             } catch (Exception ex) {
                  Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+                 System.out.println(ex);
              }
          }
            return returnVal;
@@ -192,7 +197,7 @@ public class test {
      * Web service operation
      */
     @WebMethod(operationName = "calculatepixA")
-    public void calculatepixA(@WebParam(name = "count") double count, @WebParam(name = "AOR") double AOR) throws ClassNotFoundException {
+    public void calculatepixA(@WebParam(name = "count") double count, @WebParam(name = "AOR") double AOR)  {
         
         try {
             Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
@@ -207,8 +212,10 @@ public class test {
             ps1.setDouble(1, OnepixArea);
             ps1.setInt(2, id);
             int rt1=ps1.executeUpdate();
-        } catch (SQLException ex) {
+            System.out.println("OnePixA updated"+OnepixArea);
+        } catch (Exception ex) {
             Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
         
     }
@@ -245,7 +252,7 @@ public class test {
      */
     @WebMethod(operationName = "leafarea0")
     
-    public void leafarea0(@WebParam(name = "flag") double flag,@WebParam(name = "area") double area) throws SQLException {
+    public void leafarea0(@WebParam(name = "flag") double flag,@WebParam(name = "area") double area)  {
         try {
             Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
             Connection con = DriverManager.getConnection("jdbc:odbc:test");
@@ -266,10 +273,11 @@ public class test {
          ps.setInt(2, id);
          
          int rt=ps.executeUpdate();
-         System.out.println("Leaf area is uploaded to database");
+         System.out.println("Leaf area0 is uploaded to database"+leafArea0);
 
-        } catch (ClassNotFoundException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
 
 
@@ -279,7 +287,7 @@ public class test {
      * Web service operation
      */
     @WebMethod(operationName = "leafarea180")
-    public void leafarea180(@WebParam(name = "area") double AOR,@WebParam(name = "flag") double flag) throws SQLException {
+    public void leafarea180(@WebParam(name = "area") double AOR,@WebParam(name = "flag") double flag)  {
         try {
             double onePixArea=0;
             Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
@@ -303,10 +311,11 @@ public class test {
          ps.setInt(2, id);
          
          int rt=ps.executeUpdate();
-         System.out.println("Leaf area is uploaded to database");
+         System.out.println("Leaf area180 is uploaded to database"+leafArea180);
 
-        } catch (ClassNotFoundException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex);
         }
 
     }
@@ -336,14 +345,13 @@ public class test {
         ps.setDouble(1, Leaf_Area);
          ps.setInt(2, id);
          int rt=ps.executeUpdate();
-         System.out.println("Leaf area is uploaded to database");
+         System.out.println("final area is uploaded to database"+Leaf_Area);
 
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }   catch (ClassNotFoundException ex) {
+    }   catch (Exception ex) {
             Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
+            System.out.println(ex);
+    }
+        
     }
 }
