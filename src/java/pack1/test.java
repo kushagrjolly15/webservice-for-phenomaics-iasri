@@ -5,25 +5,22 @@
  */
 package pack1;
 
+
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.jws.Oneway;
 import javax.jws.WebService;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -45,9 +42,9 @@ public class test {
     double Leaf_Area=0;
  
     
-     @WebMethod(operationName = "convertStringtoImage")
-    public String convertStringtoImage(@WebParam(name = "encodedImageStr") String encodedImageStr, @WebParam(name = "fileName") String fileName,@WebParam(name = "AOR") String AOR,@WebParam(name = "val") int value) {
-        System.out.println("VAlue"+value);
+     @WebMethod(operationName = "convert")
+    public String convert(@WebParam(name = "encodedImageStr") String encodedImageStr, @WebParam(name = "fileName") String fileName,@WebParam(name = "AOR") String AOR,@WebParam(name = "val") int value) {
+        System.out.println("Value"+value);
         FileOutputStream imageOutFile = null; 
          try {
              Connection con,con1;
@@ -61,13 +58,13 @@ public class test {
              System.out.println(" driver loaded in connection.jsp");
              stmtnew   = con.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
              // Decode String using Base64 Class
-             byte[] imageByteArray = Base64.decodeBase64(encodedImageStr);
+             byte[] imageByteArray = encodedImageStr.getBytes();
              // Write Image into File system - Make sure you update the path
-             imageOutFile = new FileOutputStream("D:/IASRI/cropped/" + fileName);
+             imageOutFile = new FileOutputStream("C:/Users/Kushagr Jolly/Documents/NetBeansProjects/webservice/IASRI/cropped" + fileName);
              imageOutFile.write(imageByteArray);
              imageOutFile.close();
              System.out.println("Image Successfully Stored");
-             FileInputStream leafPicPath= new FileInputStream("D:/IASRI/cropped/" + fileName);
+             FileInputStream leafPicPath= new FileInputStream("C:/Users/Kushagr Jolly/Documents/NetBeansProjects/webservice/IASRI/cropped" + fileName);
              BufferedImage cat;
              int height,width;
              cat = ImageIO.read(leafPicPath);
@@ -98,14 +95,14 @@ public class test {
 
                  }
                  
-             }String greyPicPath = "D:/IASRI/grey/" + fileName;
+             }String greyPicPath = "C:/Users/Kushagr Jolly/Documents/NetBeansProjects/webservice/IASRI/greyscale" + fileName;
              greyPicPath = greyPicPath.trim();
              File outputfile = new File(greyPicPath);
              ImageIO.write(cat, "jpg", outputfile);
              System.out.println("Image is successfully converted to grayscale");
              
 
-             String binPicPath = "D:/IASRI/bin/" + fileName;
+             String binPicPath = "C:/Users/Kushagr Jolly/Documents/NetBeansProjects/webservice/IASRI/binary" + fileName;
              File f2 = new File(binPicPath);
              System.out.println("1");
              ImageProcessor ip;
@@ -176,29 +173,18 @@ public class test {
                 finalarea();
                 
                 }
-            
+            imageOutFile.close();
          } catch (Exception ex) {
              Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
              System.out.println(ex);
          
-        } finally {
-             try {
-                 imageOutFile.close();
-             } catch (Exception ex) {
-                 Logger.getLogger(test.class.getName()).log(Level.SEVERE, null, ex);
-                 System.out.println(ex);
-             }
          }
            return returnVal;
 		
     }
 
-    /**
-     * Web service operation
-     */
-    @WebMethod(operationName = "calculatepixA")
-    public void calculatepixA(@WebParam(name = "count") double count, @WebParam(name = "AOR") double AOR)  {
-        
+    public void calculatepixA(double count,double AOR)  {
+       
         try {
             Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
              System.out.println("connected");
@@ -220,11 +206,8 @@ public class test {
         
     }
 
-    /**
-     * Web service operation
-     */
-    @WebMethod(operationName = "countblackpixel")
-    public int countblackpixel(@WebParam(name = "binPicPath") String binPicPath) {
+ 
+    public int countblackpixel(String binPicPath) {
         
              ImageProcessor ipB;
              ImagePlus impB = new ImagePlus(binPicPath);
@@ -243,16 +226,11 @@ public class test {
                     }
                 }
              System.out.println("leaves black pixels=" + count);
-        //TODO write your implementation code here:
         return count;
     }
 
-    /**
-     * Web service operation
-     */
-    @WebMethod(operationName = "leafarea0")
     
-    public void leafarea0(@WebParam(name = "flag") double flag,@WebParam(name = "area") double area)  {
+    public void leafarea0(double flag,double area)  {
         try {
             Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
             Connection con = DriverManager.getConnection("jdbc:odbc:test");
@@ -283,11 +261,7 @@ public class test {
 
     }
 
-    /**
-     * Web service operation
-     */
-    @WebMethod(operationName = "leafarea180")
-    public void leafarea180(@WebParam(name = "area") double AOR,@WebParam(name = "flag") double flag)  {
+    public void leafarea180(double AOR,double flag)  {
         try {
             double onePixArea=0;
             Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
